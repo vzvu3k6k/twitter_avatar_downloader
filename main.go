@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/chromedp/chromedp"
 )
@@ -62,8 +63,10 @@ func downloadFile(filename, url string) error {
 }
 
 func main() {
-	ctx, cancel := chromedp.NewContext(context.Background())
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+
+	ctx, _ := chromedp.NewContext(timeoutCtx)
 
 	twitterIds := os.Args[1:]
 	for _, id := range twitterIds {
