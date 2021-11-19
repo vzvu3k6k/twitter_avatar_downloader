@@ -15,7 +15,6 @@ import (
 
 func getAvatarURL(ctx context.Context, twitterId string) string {
 	url := "https://twitter.com/" + twitterId
-	log.Printf("get %s\n", url)
 
 	var src string
 	var ok bool
@@ -68,6 +67,7 @@ func main() {
 
 	twitterIds := os.Args[1:]
 	for _, id := range twitterIds {
+		log.Printf("get %s\n", id)
 		url := getAvatarURL(ctx, id)
 		filename := id + filepath.Ext(url)
 		downloadFile(filename, url)
