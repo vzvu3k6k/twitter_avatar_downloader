@@ -72,8 +72,12 @@ func main() {
 	twitterIds := os.Args[1:]
 	for _, id := range twitterIds {
 		log.Printf("get %s\n", id)
+
 		url := getAvatarURL(ctx, id)
+		time.Sleep(1 * time.Second)
+
 		filename := id + filepath.Ext(url)
 		downloadFile(filename, url)
+		time.Sleep(1 * time.Second)
 	}
 }
