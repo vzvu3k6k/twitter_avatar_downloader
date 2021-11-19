@@ -66,7 +66,8 @@ func main() {
 	timeoutCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	ctx, _ := chromedp.NewContext(timeoutCtx)
+	ctx, cancel := chromedp.NewContext(timeoutCtx)
+	defer cancel()
 
 	twitterIds := os.Args[1:]
 	for _, id := range twitterIds {
