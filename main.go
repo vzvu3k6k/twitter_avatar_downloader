@@ -17,17 +17,20 @@ import (
 func getAvatarURL(ctx context.Context, twitterId string) string {
 	url := "https://twitter.com/" + twitterId
 
+	if err := chromedp.Run(ctx, chromedp.Navigate(url)); err != nil {
+		log.Fatalf("could not navigate profile page: %v", err)
+	}
+
 	var src string
 	var ok bool
-	err := chromedp.Run(ctx,
-		chromedp.Navigate(url),
-		chromedp.AttributeValue(`img[src^="https://pbs.twimg.com/profile_images/"]`, "src", &src, &ok, chromedp.ByQuery),
-	)
-	if err != nil {
-		log.Fatal(err)
+	sel := `img[src^="https://pbs.twimg.com/profile_images/"], div[data-testid="emptyState"]`
+	if err := chromedp.Run(ctx,
+		chromedp.AttributeValue(sel, "src", &src, &ok, chromedp.ByQuery),
+	); err != nil {
+		log.Fatalf("could not found profile icon: %v", err)
 	}
 	if !ok {
-		log.Fatal("node not found")
+		log.Fatal("user does not exist")
 	}
 
 	src = strings.TrimSpace(src)
