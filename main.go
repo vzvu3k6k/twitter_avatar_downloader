@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -14,11 +15,11 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-func getAvatarURL(ctx context.Context, twitterId string) string {
+func getAvatarURL(ctx context.Context, twitterId string) (string, error) {
 	url := "https://twitter.com/" + twitterId
 
 	if err := chromedp.Run(ctx, chromedp.Navigate(url)); err != nil {
-		log.Fatalf("could not navigate profile page: %v", err)
+		return "", fmt.Errorf("could not navigate profile page: %w", err)
 	}
 
 	var src string
@@ -27,14 +28,14 @@ func getAvatarURL(ctx context.Context, twitterId string) string {
 	if err := chromedp.Run(ctx,
 		chromedp.AttributeValue(sel, "src", &src, &ok, chromedp.ByQuery),
 	); err != nil {
-		log.Fatalf("could not found profile icon: %v", err)
+		return "", fmt.Errorf("could not found profile icon: %w", err)
 	}
 	if !ok {
-		log.Fatal("user does not exist")
+		return "", errors.New("user does not exist")
 	}
 
 	src = strings.TrimSpace(src)
-	return deleteStrings(src, "_200x200", "_400x400")
+	return deleteStrings(src, "_200x200", "_400x400"), nil
 }
 
 func deleteStrings(s string, dels ...string) string {
@@ -76,7 +77,10 @@ func main() {
 	for _, id := range twitterIds {
 		log.Printf("get %s\n", id)
 
-		url := getAvatarURL(ctx, id)
+		url, err := getAvatarURL(ctx, id)
+		if err != nil {
+			log.Fatal(err)
+		}
 		time.Sleep(1 * time.Second)
 
 		filename := id + filepath.Ext(url)
